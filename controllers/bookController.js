@@ -2,6 +2,7 @@ const Book = require('../models/Book');
 const { validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 // POST /api/admin/books
 const createBook = async (req, res) => {
@@ -17,7 +18,10 @@ const createBook = async (req, res) => {
     let pdfUrl = null;
 
     if (req.files) {
-      if (req.files.image) imageUrl = `uploads/${req.files.image[0].filename}`;
+      if (req.files.image) {
+        const cloudUrl = await uploadToCloudinary(req.files.image[0].path);
+        imageUrl = cloudUrl || `uploads/${req.files.image[0].filename}`;
+      }
       if (req.files.pdf) pdfUrl = `uploads/${req.files.pdf[0].filename}`;
     }
 
@@ -25,6 +29,7 @@ const createBook = async (req, res) => {
       title, author, category, price, oldPrice, description, pages, language, bookType, badge, discount,
       image: imageUrl,
       pdfUrl,
+      isAvailable: req.body.isAvailable !== undefined ? req.body.isAvailable : true,
     });
 
     res.status(201).json({ success: true, message: 'Book created successfully', book });
@@ -59,10 +64,11 @@ const updateBook = async (req, res) => {
 
     if (req.files) {
       if (req.files.image) {
-        if (book.image && fs.existsSync(path.join(__dirname, '..', book.image))) {
+        if (book.image && !book.image.startsWith('http') && fs.existsSync(path.join(__dirname, '..', book.image))) {
           fs.unlinkSync(path.join(__dirname, '..', book.image));
         }
-        updates.image = `uploads/${req.files.image[0].filename}`;
+        const cloudUrl = await uploadToCloudinary(req.files.image[0].path);
+        updates.image = cloudUrl || `uploads/${req.files.image[0].filename}`;
       }
       if (req.files.pdf) {
         if (book.pdfUrl && fs.existsSync(path.join(__dirname, '..', book.pdfUrl))) {

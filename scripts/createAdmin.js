@@ -9,8 +9,8 @@ const createAdmin = async () => {
 
     const existing = await Admin.findOne({ email: 'aditya@gmail.com' });
     if (existing) {
-      console.log('Admin already exists:', existing.email);
-      process.exit(0);
+      console.log('Admin already exists. Deleting existing record for a fresh reset...');
+      await Admin.deleteOne({ email: 'aditya@gmail.com' });
     }
 
     const admin = await Admin.create({

@@ -6,6 +6,7 @@ const Book = require('../models/Book');
 const Order = require('../models/Order');
 const fs = require('fs');
 const path = require('path');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
@@ -79,11 +80,17 @@ const updateProfile = async (req, res) => {
 
     if (req.file) {
       // Delete old pic if exists
-      if (admin.profilePic) {
+      if (admin.profilePic && !admin.profilePic.startsWith('http')) {
         const oldPath = path.join(__dirname, '..', admin.profilePic);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      admin.profilePic = `uploads/${req.file.filename}`;
+      // Upload to Cloudinary as well as keeping the local file
+      const cloudUrl = await uploadToCloudinary(req.file.path);
+      if (cloudUrl) {
+        admin.profilePic = cloudUrl;
+      } else {
+        admin.profilePic = `uploads/${req.file.filename}`;
+      }
     }
 
     await admin.save();

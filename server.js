@@ -13,10 +13,18 @@ const app = express();
 
 connectDB();
 
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
+
 app.use(helmet());
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Dynamically echo back any requesting origin to resolve all CORS port clashes on localhost
+    callback(null, true);
+  },
   credentials: true,
 }));
 
@@ -28,8 +36,6 @@ app.use('/api', rateLimit({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/admin', adminRoutes);

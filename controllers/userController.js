@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
@@ -98,11 +99,17 @@ const updateProfile = async (req, res) => {
     if (mobile !== undefined) user.mobile = mobile;
 
     if (req.file) {
-      if (user.profilePic) {
+      if (user.profilePic && !user.profilePic.startsWith('http')) {
         const oldPath = path.join(__dirname, '..', user.profilePic);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      user.profilePic = `uploads/${req.file.filename}`;
+      // Upload to Cloudinary as well as keeping local copy
+      const cloudUrl = await uploadToCloudinary(req.file.path);
+      if (cloudUrl) {
+        user.profilePic = cloudUrl;
+      } else {
+        user.profilePic = `uploads/${req.file.filename}`;
+      }
     }
 
     await user.save();

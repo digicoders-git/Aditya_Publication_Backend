@@ -32,7 +32,12 @@ const createBook = async (req, res) => {
       isAvailable: req.body.isAvailable !== undefined ? req.body.isAvailable : true,
     });
 
-    res.status(201).json({ success: true, message: 'Book created successfully', book });
+    const obj = book.toObject();
+    if (obj.image && !obj.image.startsWith('http')) {
+      obj.image = `${req.protocol}://${req.get('host')}/${obj.image}`;
+    }
+
+    res.status(201).json({ success: true, message: 'Book created successfully', book: obj });
   } catch (err) {
     console.error('createBook error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -43,7 +48,16 @@ const createBook = async (req, res) => {
 const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find().sort('-createdAt');
-    res.json({ success: true, books });
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const booksWithUrl = books.map(b => {
+      const obj = b.toObject();
+      if (obj.image && !obj.image.startsWith('http')) {
+        obj.image = `${protocol}://${host}/${obj.image}`;
+      }
+      return obj;
+    });
+    res.json({ success: true, books: booksWithUrl });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -79,7 +93,11 @@ const updateBook = async (req, res) => {
     }
 
     const updatedBook = await Book.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
-    res.json({ success: true, message: 'Book updated successfully', book: updatedBook });
+    const obj = updatedBook.toObject();
+    if (obj.image && !obj.image.startsWith('http')) {
+      obj.image = `${req.protocol}://${req.get('host')}/${obj.image}`;
+    }
+    res.json({ success: true, message: 'Book updated successfully', book: obj });
   } catch (err) {
     console.error('updateBook error:', err);
     res.status(500).json({ success: false, message: 'Server error' });

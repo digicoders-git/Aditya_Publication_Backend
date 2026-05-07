@@ -41,6 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/books', publicRoutes);
+app.use('/api/offers', require('express').Router().get('/', require('./controllers/offerController').getActiveOffers));
 
 app.get('/', (req, res) => res.json({ message: 'Bookinform API running' }));
 
@@ -49,5 +50,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: err.message || 'Server error' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;  
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

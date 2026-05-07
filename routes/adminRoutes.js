@@ -8,6 +8,7 @@ const { login, getMe, updateProfile, getUsers, toggleUserStatus, getDashboardSta
 const { createBook, getAllBooks, updateBook, deleteBook } = require('../controllers/bookController');
 const { getPayments, getSalesReport } = require('../controllers/orderUserController');
 const { getAllOrders, getHardBookOrders, updateOrderStatus } = require('../controllers/orderController');
+const { getAllOffers, createOffer, updateOffer, toggleOfferStatus, deleteOffer } = require('../controllers/offerController');
 
 
 const { protect } = require('../middleware/authMiddleware');
@@ -73,6 +74,20 @@ router.put('/books/:id', protect, upload.fields([{ name: 'image', maxCount: 1 },
 ], updateBook);
 
 router.delete('/books/:id', protect, deleteBook);
+
+// Offer Management
+router.get('/offers', protect, getAllOffers);
+router.post('/offers', protect, upload.single('image'), [
+  body('title').notEmpty().withMessage('Title is required'),
+  body('description').notEmpty().withMessage('Description is required'),
+  body('price').isNumeric().withMessage('Price must be a number'),
+], createOffer);
+router.put('/offers/:id', protect, upload.single('image'), [
+  body('title').optional().trim().notEmpty(),
+  body('price').optional().isNumeric(),
+], updateOffer);
+router.patch('/offers/:id/toggle', protect, toggleOfferStatus);
+router.delete('/offers/:id', protect, deleteOffer);
 
 // Order Management
 router.get('/orders', protect, getAllOrders);

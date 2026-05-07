@@ -1,5 +1,13 @@
 const Book = require('../models/Book');
 
+const buildImageUrl = (req, imagePath) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith('http')) return imagePath;
+  const protocol = req.protocol;
+  const host = req.get('host');
+  return `${protocol}://${host}/${imagePath}`;
+};
+
 // GET /api/books
 const getBooks = async (req, res) => {
   try {
@@ -34,7 +42,13 @@ const getBooks = async (req, res) => {
       .select('-pdfUrl')
       .sort(sortOptions[sort] || { createdAt: -1 });
 
-    res.json({ success: true, count: books.length, books });
+    const booksWithFullUrl = books.map(b => {
+      const obj = b.toObject();
+      obj.image = buildImageUrl(req, obj.image);
+      return obj;
+    });
+
+    res.json({ success: true, count: booksWithFullUrl.length, books: booksWithFullUrl });
   } catch (err) {
     console.error('getBooks error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -48,7 +62,9 @@ const getBookById = async (req, res) => {
     if (!book || !book.isAvailable) {
       return res.status(404).json({ success: false, message: 'Book not found' });
     }
-    res.json({ success: true, book });
+    const obj = book.toObject();
+    obj.image = buildImageUrl(req, obj.image);
+    res.json({ success: true, book: obj });
   } catch (err) {
     console.error('getBookById error:', err);
     res.status(500).json({ success: false, message: 'Server error' });

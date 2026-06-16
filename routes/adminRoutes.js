@@ -10,6 +10,7 @@ const { getPayments, getSalesReport } = require('../controllers/orderUserControl
 const { getAllOrders, getHardBookOrders, updateOrderStatus } = require('../controllers/orderController');
 const { getAllOffers, createOffer, updateOffer, toggleOfferStatus, deleteOffer } = require('../controllers/offerController');
 const { getAllNews, createNews, updateNews, toggleNewsStatus, deleteNews } = require('../controllers/newsController');
+const { getContactMessages, deleteContactMessage } = require('../controllers/contactController');
 
 
 const { protect } = require('../middleware/authMiddleware');
@@ -112,6 +113,10 @@ router.put('/news/:id', protect, upload.single('image'), [
 ], updateNews);
 router.patch('/news/:id/toggle', protect, toggleNewsStatus);
 router.delete('/news/:id', protect, deleteNews);
+
+// Contact Management
+router.get('/contacts', protect, getContactMessages);
+router.delete('/contacts/:id', protect, deleteContactMessage);
 
 module.exports = router;
 

@@ -41,6 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/books', publicRoutes);
+app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/offers', require('express').Router().get('/', require('./controllers/offerController').getActiveOffers));
 app.use('/api/news', require('express').Router().get('/', require('./controllers/newsController').getPublishedNews));
 

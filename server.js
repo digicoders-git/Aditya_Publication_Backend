@@ -42,6 +42,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/books', publicRoutes);
 app.use('/api/offers', require('express').Router().get('/', require('./controllers/offerController').getActiveOffers));
+app.use('/api/news', require('express').Router().get('/', require('./controllers/newsController').getPublishedNews));
 
 app.get('/', (req, res) => res.json({ message: 'Bookinform API running' }));
 

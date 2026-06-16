@@ -60,6 +60,22 @@ const bookSchema = new mongoose.Schema({
     type: Number,
     default: 0, // Percentage
   },
+  isRecommended: {
+    type: Boolean,
+    default: false,
+  },
+  isSpecialOffer: {
+    type: Boolean,
+    default: false,
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
+  isTopBook: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Book', bookSchema);

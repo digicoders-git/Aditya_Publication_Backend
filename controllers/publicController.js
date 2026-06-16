@@ -71,4 +71,34 @@ const getBookById = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getBookById };
+// GET /api/books/section/recommended
+const getSectionBooks = (flagField) => async (req, res) => {
+  try {
+    const books = await Book.find({ isAvailable: true, [flagField]: true })
+      .select('-pdfUrl')
+      .sort({ createdAt: -1 });
+    const booksWithFullUrl = books.map(b => {
+      const obj = b.toObject();
+      obj.image = buildImageUrl(req, obj.image);
+      return obj;
+    });
+    res.json({ success: true, count: booksWithFullUrl.length, books: booksWithFullUrl });
+  } catch (err) {
+    console.error(`getSectionBooks(${flagField}) error:`, err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// GET /api/books/categories
+const getCategories = async (req, res) => {
+  try {
+    const categories = await Book.distinct('category', { isAvailable: true });
+    const sortedCategories = categories.filter(Boolean).sort((a, b) => a.localeCompare(b));
+    res.json({ success: true, categories: sortedCategories });
+  } catch (err) {
+    console.error('getCategories error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+module.exports = { getBooks, getBookById, getSectionBooks, getCategories };

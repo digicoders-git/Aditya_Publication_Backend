@@ -9,6 +9,7 @@ const { createBook, getAllBooks, updateBook, deleteBook } = require('../controll
 const { getPayments, getSalesReport } = require('../controllers/orderUserController');
 const { getAllOrders, getHardBookOrders, updateOrderStatus } = require('../controllers/orderController');
 const { getAllOffers, createOffer, updateOffer, toggleOfferStatus, deleteOffer } = require('../controllers/offerController');
+const { getAllNews, createNews, updateNews, toggleNewsStatus, deleteNews } = require('../controllers/newsController');
 
 
 const { protect } = require('../middleware/authMiddleware');
@@ -99,6 +100,18 @@ router.patch('/orders/:id/status', protect, [
     .isIn(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])
     .withMessage('Invalid status value'),
 ], updateOrderStatus);
+
+// News Management
+router.get('/news', protect, getAllNews);
+router.post('/news', protect, upload.single('image'), [
+  body('title').notEmpty().withMessage('Title is required'),
+  body('excerpt').notEmpty().withMessage('Excerpt is required'),
+], createNews);
+router.put('/news/:id', protect, upload.single('image'), [
+  body('title').optional().trim().notEmpty(),
+], updateNews);
+router.patch('/news/:id/toggle', protect, toggleNewsStatus);
+router.delete('/news/:id', protect, deleteNews);
 
 module.exports = router;
 

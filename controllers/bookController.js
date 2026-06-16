@@ -12,7 +12,7 @@ const createBook = async (req, res) => {
   }
 
   try {
-    const { title, author, category, price, oldPrice, description, pages, language, bookType, badge, discount } = req.body;
+    const { title, author, category, price, oldPrice, description, pages, language, bookType, badge, discount, isRecommended, isSpecialOffer, isFeatured, isTopBook } = req.body;
 
     let imageUrl = null;
     let pdfUrl = null;
@@ -30,6 +30,10 @@ const createBook = async (req, res) => {
       image: imageUrl,
       pdfUrl,
       isAvailable: req.body.isAvailable !== undefined ? req.body.isAvailable : true,
+      isRecommended: isRecommended === 'true' || isRecommended === true,
+      isSpecialOffer: isSpecialOffer === 'true' || isSpecialOffer === true,
+      isFeatured: isFeatured === 'true' || isFeatured === true,
+      isTopBook: isTopBook === 'true' || isTopBook === true,
     });
 
     const obj = book.toObject();
@@ -74,7 +78,11 @@ const updateBook = async (req, res) => {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ success: false, message: 'Book not found' });
 
-    const updates = req.body;
+    const updates = { ...req.body };
+    // Ensure boolean conversion for section flags coming from FormData
+    ['isAvailable', 'isRecommended', 'isSpecialOffer', 'isFeatured', 'isTopBook'].forEach(key => {
+      if (updates[key] !== undefined) updates[key] = updates[key] === 'true' || updates[key] === true;
+    });
 
     if (req.files) {
       if (req.files.image) {

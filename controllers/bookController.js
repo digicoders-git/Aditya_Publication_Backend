@@ -63,7 +63,8 @@ const getAllBooks = async (req, res) => {
     });
     res.json({ success: true, books: booksWithUrl });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('getAllBooks error:', err);
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 };
 
@@ -128,7 +129,8 @@ const deleteBook = async (req, res) => {
     await book.deleteOne();
     res.json({ success: true, message: 'Book deleted successfully' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('deleteBook error:', err);
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 };
 

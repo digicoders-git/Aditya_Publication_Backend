@@ -11,6 +11,9 @@ const path = require('path');
 
 const app = express();
 
+// Trust proxy for hosted environments like Render to get correct client IP
+app.set('trust proxy', 1);
+
 connectDB();
 
 app.use('/uploads', (req, res, next) => {
